@@ -5,6 +5,7 @@ import pygame as pg
 # Importing prepare initializes the display.
 import prepare
 import actors
+from topdown_group import TopdownGroup
         
             
 class App(object):
@@ -15,7 +16,7 @@ class App(object):
         self.clock  = pg.time.Clock()
         self.fps = 60
         self.done = False
-        self.all_sprites = pg.sprite.Group()
+        self.all_sprites = TopdownGroup()
         self.player = actors.Player(self.screen_rect.center, 3)
         self.all_sprites.add(self.player)
         self.make_npcs()
