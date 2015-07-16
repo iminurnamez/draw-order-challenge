@@ -88,7 +88,6 @@ class RPGSprite(pg.sprite.DirtySprite):
             self.rect.y += y_move
             if any((x_move, y_move)):
                 self.dirty = 1
-        self.layer = self.rect.bottom
 
     def draw(self, surface):
         """Draw sprite to surface (not used if using group draw functions)."""

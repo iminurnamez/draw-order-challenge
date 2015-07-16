@@ -53,8 +53,10 @@ class App(object):
         now = pg.time.get_ticks()
         self.all_sprites.update(now, self.screen_rect)
         for sprite in self.all_sprites:
-            self.all_sprites.change_layer(sprite, sprite.rect.bottom)
-            
+            #change_layer automatically sets sprite.dirty from 0 to 1
+            if sprite.layer != sprite.rect.bottom:
+                self.all_sprites.change_layer(sprite, sprite.rect.bottom)
+                
     def render(self):
         """Fill screen and render all actors."""
         dirty_rects = self.all_sprites.draw(self.screen)
