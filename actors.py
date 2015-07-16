@@ -9,7 +9,7 @@ import tools
 SPRITE_SIZE = (32, 36)
 
 
-class RPGSprite(pg.sprite.Sprite):
+class RPGSprite(pg.sprite.DirtySprite):
     """Base class for player and AI sprites."""
     def __init__(self, pos, speed, name, facing="DOWN", *groups):
         super(RPGSprite, self).__init__(*groups)
@@ -18,14 +18,16 @@ class RPGSprite(pg.sprite.Sprite):
         self.direction = facing
         self.old_direction = None  
         self.direction_stack = []  
-        self.redraw = True  
+        self.redraw = True
+        self.dirty = 1        
         self.animate_timer = 0.0
         self.animate_fps = 10.0
         self.walkframes = None
         self.walkframe_dict = self.make_frame_dict(self.get_frames(name))
         self.adjust_images()
         self.rect = self.image.get_rect(center=pos)
-
+        self.layer = self.rect.bottom
+        
     def get_frames(self, character):
         """Get a list of all frames."""
         sheet = prepare.GFX[character]
@@ -52,6 +54,7 @@ class RPGSprite(pg.sprite.Sprite):
         if self.redraw or now-self.animate_timer > 1000/self.animate_fps:
             self.image = next(self.walkframes)
             self.animate_timer = now
+            self.dirty = 1
         self.redraw = False
 
     def add_direction(self, direction):
@@ -79,8 +82,13 @@ class RPGSprite(pg.sprite.Sprite):
         self.adjust_images(now)
         if self.direction_stack:
             direction_vector = prepare.DIRECT_DICT[self.direction]
-            self.rect.x += self.speed*direction_vector[0]
-            self.rect.y += self.speed*direction_vector[1]
+            x_move = self.speed*direction_vector[0]
+            y_move = self.speed*direction_vector[1]
+            self.rect.x += x_move
+            self.rect.y += y_move
+            if any((x_move, y_move)):
+                self.dirty = 1
+        self.layer = self.rect.bottom
 
     def draw(self, surface):
         """Draw sprite to surface (not used if using group draw functions)."""
@@ -147,3 +155,4 @@ class AISprite(RPGSprite):
             super(AISprite, self).add_direction(direction)
         self.wait_delay = random.randint(*self.wait_range)
         self.wait_time = now
+

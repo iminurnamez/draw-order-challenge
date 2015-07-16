@@ -5,7 +5,6 @@ import pygame as pg
 # Importing prepare initializes the display.
 import prepare
 import actors
-from topdown_group import TopdownGroup
         
             
 class App(object):
@@ -16,7 +15,10 @@ class App(object):
         self.clock  = pg.time.Clock()
         self.fps = 60
         self.done = False
-        self.all_sprites = TopdownGroup()
+        bg = pg.Surface(self.screen.get_size()).convert()
+        bg.fill(prepare.BACKGROUND_COLOR)
+        self.all_sprites = pg.sprite.LayeredDirty()
+        self.all_sprites.clear(self.screen, bg)
         self.player = actors.Player(self.screen_rect.center, 3)
         self.all_sprites.add(self.player)
         self.make_npcs()
@@ -50,12 +52,13 @@ class App(object):
         """Update all actors."""
         now = pg.time.get_ticks()
         self.all_sprites.update(now, self.screen_rect)
-
+        for sprite in self.all_sprites:
+            self.all_sprites.change_layer(sprite, sprite.rect.bottom)
+            
     def render(self):
         """Fill screen and render all actors."""
-        self.screen.fill(prepare.BACKGROUND_COLOR)
-        self.all_sprites.draw(self.screen)
-        pg.display.update()
+        dirty_rects = self.all_sprites.draw(self.screen)
+        pg.display.update(dirty_rects)
 
     def main_loop(self):
         """
@@ -68,7 +71,6 @@ class App(object):
             self.render()
             self.clock.tick(self.fps)
             self.display_fps()
-
 
 def main():
     """Create an App and start the program."""
